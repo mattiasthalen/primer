@@ -10,7 +10,7 @@
 - NEVER use raw git for remote operations when a CLI is available for the remote platform (e.g., `gh` for GitHub, `az repos` for Azure DevOps).
 - NEVER rely on global git email. Before committing, check `git config --local user.email`. If not set, prompt the user.
 - NEVER open PRs without enabling auto-merge (e.g., `gh pr merge --auto --merge` after `gh pr create`).
-- NEVER use squash merges.
+- NEVER use squash or rebase merges. Always use regular merge commits (`--merge`).
 
 # Superpowers
 
