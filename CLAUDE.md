@@ -15,6 +15,7 @@
 
 # Repo Setup
 
+- NEVER leave the default branch unprotected. Require PRs (no direct pushes) with admin enforcement.
 - NEVER leave auto-merge disabled on a new repo.
 
 # Superpowers
