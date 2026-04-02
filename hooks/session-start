@@ -10,12 +10,13 @@ PROJECT_ROOT="$(pwd)"
 # Read plugin version from plugin.json
 PLUGIN_VERSION=$(grep -o '"version": *"[^"]*"' "${PLUGIN_ROOT}/.claude-plugin/plugin.json" | head -1 | cut -d'"' -f4)
 
-# --- Phase 0: Version check (early exit) ---
+# --- Phase 0: Version check ---
 VERSION_FILE="${PROJECT_ROOT}/.claude/.primer-version"
+version_match=false
 if [ -f "$VERSION_FILE" ]; then
     CURRENT_VERSION=$(cat "$VERSION_FILE" 2>/dev/null || echo "")
     if [ "$CURRENT_VERSION" = "$PLUGIN_VERSION" ]; then
-        exit 0
+        version_match=true
     fi
 fi
 
@@ -51,87 +52,89 @@ if grep -q '"superpowers@claude-plugins-official"' "${PROJECT_ROOT}/.claude/sett
     fi
 fi
 
-# --- Phase 2: Scaffold missing files ---
-TEMPLATES_DIR="${PLUGIN_ROOT}/templates"
-if [ -d "$TEMPLATES_DIR" ]; then
-    while IFS= read -r -d '' template_file; do
-        relative_path="${template_file#${TEMPLATES_DIR}/}"
-        target_file="${PROJECT_ROOT}/${relative_path}"
+if [ "$version_match" = false ]; then
+    # --- Phase 2: Scaffold missing files ---
+    TEMPLATES_DIR="${PLUGIN_ROOT}/templates"
+    if [ -d "$TEMPLATES_DIR" ]; then
+        while IFS= read -r -d '' template_file; do
+            relative_path="${template_file#${TEMPLATES_DIR}/}"
+            target_file="${PROJECT_ROOT}/${relative_path}"
 
-        # Skip .gitignore — handled in Phase 3
-        if [ "$relative_path" = ".gitignore" ]; then
-            continue
-        fi
-
-        if [ ! -f "$target_file" ]; then
-            mkdir -p "$(dirname "$target_file")"
-            cp "$template_file" "$target_file"
-            scaffolded_files+=("$relative_path")
-        fi
-    done < <(find "$TEMPLATES_DIR" -type f -print0 | sort -z)
-fi
-
-# --- Phase 3: Smart-append .gitignore ---
-GITIGNORE_TEMPLATE="${TEMPLATES_DIR}/.gitignore"
-GITIGNORE_TARGET="${PROJECT_ROOT}/.gitignore"
-if [ -f "$GITIGNORE_TEMPLATE" ]; then
-    if [ ! -f "$GITIGNORE_TARGET" ]; then
-        cp "$GITIGNORE_TEMPLATE" "$GITIGNORE_TARGET"
-        scaffolded_files+=(".gitignore")
-    else
-        while IFS= read -r entry; do
-            [[ -z "$entry" || "$entry" =~ ^# ]] && continue
-            if ! grep -qxF "$entry" "$GITIGNORE_TARGET" 2>/dev/null; then
-                appended_entries+=("$entry")
+            # Skip .gitignore — handled in Phase 3
+            if [ "$relative_path" = ".gitignore" ]; then
+                continue
             fi
-        done < "$GITIGNORE_TEMPLATE"
 
-        if [ ${#appended_entries[@]} -gt 0 ]; then
-            if ! grep -qxF "# primer" "$GITIGNORE_TARGET" 2>/dev/null; then
-                printf '\n# primer\n' >> "$GITIGNORE_TARGET"
+            if [ ! -f "$target_file" ]; then
+                mkdir -p "$(dirname "$target_file")"
+                cp "$template_file" "$target_file"
+                scaffolded_files+=("$relative_path")
             fi
-            for entry in "${appended_entries[@]}"; do
-                printf '%s\n' "$entry" >> "$GITIGNORE_TARGET"
-            done
+        done < <(find "$TEMPLATES_DIR" -type f -print0 | sort -z)
+    fi
+
+    # --- Phase 3: Smart-append .gitignore ---
+    GITIGNORE_TEMPLATE="${TEMPLATES_DIR}/.gitignore"
+    GITIGNORE_TARGET="${PROJECT_ROOT}/.gitignore"
+    if [ -f "$GITIGNORE_TEMPLATE" ]; then
+        if [ ! -f "$GITIGNORE_TARGET" ]; then
+            cp "$GITIGNORE_TEMPLATE" "$GITIGNORE_TARGET"
+            scaffolded_files+=(".gitignore")
+        else
+            while IFS= read -r entry; do
+                [[ -z "$entry" || "$entry" =~ ^# ]] && continue
+                if ! grep -qxF "$entry" "$GITIGNORE_TARGET" 2>/dev/null; then
+                    appended_entries+=("$entry")
+                fi
+            done < "$GITIGNORE_TEMPLATE"
+
+            if [ ${#appended_entries[@]} -gt 0 ]; then
+                if ! grep -qxF "# primer" "$GITIGNORE_TARGET" 2>/dev/null; then
+                    printf '\n# primer\n' >> "$GITIGNORE_TARGET"
+                fi
+                for entry in "${appended_entries[@]}"; do
+                    printf '%s\n' "$entry" >> "$GITIGNORE_TARGET"
+                done
+            fi
         fi
     fi
-fi
 
-# --- Phase 4: Detect stale files ---
-if [ -d "$TEMPLATES_DIR" ] && [ "${PRIMER_UPDATE:-}" != "1" ]; then
-    while IFS= read -r -d '' template_file; do
-        relative_path="${template_file#${TEMPLATES_DIR}/}"
-        target_file="${PROJECT_ROOT}/${relative_path}"
+    # --- Phase 4: Detect stale files ---
+    if [ -d "$TEMPLATES_DIR" ] && [ "${PRIMER_UPDATE:-}" != "1" ]; then
+        while IFS= read -r -d '' template_file; do
+            relative_path="${template_file#${TEMPLATES_DIR}/}"
+            target_file="${PROJECT_ROOT}/${relative_path}"
 
-        [[ "$relative_path" = ".gitignore" ]] && continue
+            [[ "$relative_path" = ".gitignore" ]] && continue
 
-        if [ -f "$target_file" ]; then
-            template_sum=$(checksum "$template_file")
-            target_sum=$(checksum "$target_file")
-            if [ "$template_sum" != "$target_sum" ]; then
-                stale_files+=("$relative_path")
+            if [ -f "$target_file" ]; then
+                template_sum=$(checksum "$template_file")
+                target_sum=$(checksum "$target_file")
+                if [ "$template_sum" != "$target_sum" ]; then
+                    stale_files+=("$relative_path")
+                fi
             fi
-        fi
-    done < <(find "$TEMPLATES_DIR" -type f -print0 | sort -z)
-fi
+        done < <(find "$TEMPLATES_DIR" -type f -print0 | sort -z)
+    fi
 
-# --- Phase 4b: Overwrite stale files if PRIMER_UPDATE=1 ---
-if [ "${PRIMER_UPDATE:-}" = "1" ] && [ -d "$TEMPLATES_DIR" ]; then
-    while IFS= read -r -d '' template_file; do
-        relative_path="${template_file#${TEMPLATES_DIR}/}"
-        target_file="${PROJECT_ROOT}/${relative_path}"
+    # --- Phase 4b: Overwrite stale files if PRIMER_UPDATE=1 ---
+    if [ "${PRIMER_UPDATE:-}" = "1" ] && [ -d "$TEMPLATES_DIR" ]; then
+        while IFS= read -r -d '' template_file; do
+            relative_path="${template_file#${TEMPLATES_DIR}/}"
+            target_file="${PROJECT_ROOT}/${relative_path}"
 
-        [[ "$relative_path" = ".gitignore" ]] && continue
+            [[ "$relative_path" = ".gitignore" ]] && continue
 
-        if [ -f "$target_file" ]; then
-            template_sum=$(checksum "$template_file")
-            target_sum=$(checksum "$target_file")
-            if [ "$template_sum" != "$target_sum" ]; then
-                cp "$template_file" "$target_file"
-                stale_files+=("$relative_path (updated)")
+            if [ -f "$target_file" ]; then
+                template_sum=$(checksum "$template_file")
+                target_sum=$(checksum "$target_file")
+                if [ "$template_sum" != "$target_sum" ]; then
+                    cp "$template_file" "$target_file"
+                    stale_files+=("$relative_path (updated)")
+                fi
             fi
-        fi
-    done < <(find "$TEMPLATES_DIR" -type f -print0 | sort -z)
+        done < <(find "$TEMPLATES_DIR" -type f -print0 | sort -z)
+    fi
 fi
 
 # --- Phase 5: Write version marker ---
