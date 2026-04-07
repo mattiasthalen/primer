@@ -1,14 +1,13 @@
 ---
 name: lint-claude
-description: Validates CLAUDE.md conventions when editing or creating it
-autoTrigger: When editing or creating CLAUDE.md
+description: Use when editing or creating CLAUDE.md — validates conventions
 ---
 
-When editing or creating CLAUDE.md, validate the following conventions:
+When editing or creating CLAUDE.md, validate:
 
 1. **Line count:** Must be under 200 lines
-2. **Constraint pattern:** Every constraint must follow "DON'T do x — DO y" pattern (both a negative and a positive)
-3. **No misplaced rules:** No rules that belong in settings.json or hooks instead (like attribution, formatting, permissions)
-4. **Necessity test:** Every rule should fail the test: "Would Claude actually get this wrong without it?" — flag any that would not
+2. **Constraint pattern:** Every rule must follow `.claude/rules/rule-style.md`
+3. **Index only:** Flag any rule that contains detailed specs — those belong in `.claude/rules/`
+4. **Worth it:** Every rule should fail the test "Would Claude actually get this wrong without it?" — flag any that wouldn't
 
 Output a pass/fail summary with specific line numbers for violations.

@@ -4,18 +4,3 @@ CLAUDE.local.md
 
 # Git worktrees
 .worktrees/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# Environment
-.env
-.env.*
-!.env.example
