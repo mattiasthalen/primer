@@ -6,7 +6,7 @@ GitHub template repository for bootstrapping projects with an opinionated devcon
 
 1. Click **"Use this template"** on GitHub to create a new repo
 2. Open in a devcontainer (VS Code, Codespaces, etc.)
-3. The `postCreateCommand` handles GitHub auth and SSH commit signing
+3. Run `just setup-git` for GitHub auth and SSH commit signing
 4. Edit `CLAUDE.md` to describe your project and add constraints
 
 ## Customizing
@@ -27,7 +27,7 @@ This uses git merge, so your project-specific changes are preserved and conflict
 
 ## What's included
 
-- **Devcontainer** with network firewall sandboxing (adapted from [anthropics/claude-code](https://github.com/anthropics/claude-code/tree/main/.devcontainer))
+- **Devcontainer** with Claude Code, Node, GitHub CLI, just, lefthook, and direnv
 - **Claude Code config** with [superpowers](https://github.com/claude-plugins-official/superpowers) plugin, rules, and lint skill
 - **Conventional commits** enforced via `.claude/rules/conventional-commits.md`
 - **Functional programming** conventions via `.claude/rules/functional-programming.md`
