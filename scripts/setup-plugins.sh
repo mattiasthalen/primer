@@ -16,12 +16,7 @@ else
   echo "Claude Code CLI not found, skipping Claude Code plugins."
 fi
 
-# --- Codex Plugins ---
-if ! command -v codex &> /dev/null; then
-  echo "Codex CLI not found, installing..."
-  npm install -g @openai/codex
-fi
-
+# --- Codex Skills ---
 echo "Installing Codex skills..."
 npx -y skills add JuliusBrussee/caveman -a codex 2>/dev/null || true
 
