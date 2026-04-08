@@ -12,4 +12,5 @@
 - ALWAYS write a failing test first, implement until it passes, then commit.
 - ALWAYS use conventional commits with scope.
 - ALWAYS push after every commit.
+- ALWAYS use merge commits when merging PRs or branches — preserve full commit history.
 - ALWAYS treat the repo as the only durable state — this is a sandbox/devcontainer and the global home directory is wiped on rebuild.
