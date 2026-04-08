@@ -6,8 +6,9 @@
 - ALWAYS save plans as YYYY-MM-DD-feature-slug.md in /docs/architecture/plans/.
 - ALWAYS save design specs as YYYY-MM-DD-feature-slug-design.md in /docs/architecture/specs/.
 - ALWAYS commit and push the plan before starting any implementation work.
-- ALWAYS save decisions as YYYY-MM-DD-feature-slug-decision.md in /docs/architecture/decisions/ when choosing between alternatives, including what was chosen, what was rejected, and why.
-- ALWAYS capture decisions before implementing the chosen approach — if you picked one option over another, write the decision file first.
+- ALWAYS write decisions to a single YYYY-MM-DD-feature-slug-decision.md in /docs/architecture/decisions/ — one file per feature, accumulating all decisions for that slug.
+- ALWAYS add a decision entry when brainstorming produces 2+ approaches, structured as: Context (why the decision arose), Options considered (each with trade-offs, marked chosen/rejected), and Decision (what was chosen and why).
+- ALWAYS commit and push the decision doc before writing the spec or plan for that feature.
 - ALWAYS prefer functional programming with small, pure functions.
 - ALWAYS follow the TDD cycle: write a failing test, verify it fails, implement minimal code to pass, verify it passes, then commit.
 - ALWAYS structure each plan task as: test → verify-fail → implement → verify-pass → commit. Each step is one action.
