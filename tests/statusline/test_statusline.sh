@@ -110,6 +110,13 @@ assert_contains "sonnet 4.6" "Sonnet 4.6" "$result"
 result=$(CLAUDE_PROJECT_DIR="/workspaces/primer" GIT_TOPLEVEL="/workspaces/primer" GIT_DIRTY="" GIT_UNTRACKED="" GIT_NO_UPSTREAM="1" bash "$SCRIPT" <<< '{"model":{"id":"claude-haiku-4-5-20251001","display_name":"Haiku"},"context_window":{"used_percentage":10,"context_window_size":200000},"cost":{"total_cost_usd":0.5}}')
 assert_contains "haiku 4.5" "Haiku 4.5" "$result"
 
+# Model IDs with context-window suffix (e.g. [1m])
+result=$(echo '{"model":{"id":"claude-opus-4-6[1m]","display_name":"Opus"},"context_window":{"used_percentage":5,"context_window_size":1000000},"cost":{"total_cost_usd":0.5}}' | bash "$SCRIPT")
+assert_contains "opus 4.6 with [1m] suffix" "Opus 4.6" "$result"
+
+result=$(echo '{"model":{"id":"claude-sonnet-4-6[1m]","display_name":"Sonnet"},"context_window":{"used_percentage":5,"context_window_size":1000000},"cost":{"total_cost_usd":0.5}}' | bash "$SCRIPT")
+assert_contains "sonnet 4.6 with [1m] suffix" "Sonnet 4.6" "$result"
+
 # --- Context display + color thresholds ---
 echo "Context display and color thresholds:"
 

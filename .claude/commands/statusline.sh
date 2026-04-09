@@ -21,6 +21,7 @@ model_id=$(echo "$input" | jq -r '.model.id')
 # claude-sonnet-4-6 → Sonnet 4.6
 # claude-haiku-4-5-20251001 → Haiku 4.5
 model_name=$(echo "$model_id" \
+  | sed -E 's/\[.*\]$//' \
   | sed -E 's/^claude-//' \
   | sed -E 's/-[0-9]{8,}$//' \
   | sed -E 's/-([0-9]+)-([0-9]+)$/ \1.\2/' \
