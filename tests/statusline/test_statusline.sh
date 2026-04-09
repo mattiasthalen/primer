@@ -21,10 +21,10 @@ assert_contains() {
 # --- Model name derivation ---
 echo "Model name derivation:"
 
-result=$(echo '{"model":{"id":"claude-opus-4-6","display_name":"Opus"},"context_window":{"used_percentage":10,"context_window_size":1000000},"cost":{"total_cost_usd":0.5}}' | bash "$SCRIPT")
+result=$(echo '{"model":{"id":"claude-opus-4-6","display_name":"Opus"},"context_window":{"used_percentage":5,"context_window_size":1000000},"cost":{"total_cost_usd":0.5}}' | bash "$SCRIPT")
 assert_contains "opus 4.6" "Opus 4.6" "$result"
 
-result=$(echo '{"model":{"id":"claude-sonnet-4-6","display_name":"Sonnet"},"context_window":{"used_percentage":10,"context_window_size":1000000},"cost":{"total_cost_usd":0.5}}' | bash "$SCRIPT")
+result=$(echo '{"model":{"id":"claude-sonnet-4-6","display_name":"Sonnet"},"context_window":{"used_percentage":5,"context_window_size":1000000},"cost":{"total_cost_usd":0.5}}' | bash "$SCRIPT")
 assert_contains "sonnet 4.6" "Sonnet 4.6" "$result"
 
 result=$(echo '{"model":{"id":"claude-haiku-4-5-20251001","display_name":"Haiku"},"context_window":{"used_percentage":10,"context_window_size":200000},"cost":{"total_cost_usd":0.5}}' | bash "$SCRIPT")

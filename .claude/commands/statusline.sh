@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 input=$(cat)
 
 model_id=$(echo "$input" | jq -r '.model.id')
@@ -30,10 +31,9 @@ model_name=$(echo "$model_id" | sed -E 's/^claude-//; s/-[0-9]{8,}$//; s/-/ /g' 
 }')
 
 pct=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
-window=$(echo "$input" | jq -r '.context_window.context_window_size // 200000')
 cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
 
-used_tokens=$(( window * pct / 100 ))
+used_tokens=$(echo "$input" | jq -r '(.context_window.used_percentage // 0) * (.context_window.context_window_size // 200000) / 100 | round')
 used_k=$(( (used_tokens + 500) / 1000 ))
 
 cost_fmt=$(printf '$%.2f' "$cost")
