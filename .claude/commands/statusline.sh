@@ -59,4 +59,25 @@ if [ -z "$branch" ]; then
   branch="${GIT_SHA:-$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")}"
 fi
 
-printf '%b\n' "${path_display} (${branch}) | ${model_name} | ${ctx_display} | ${cost_fmt}"
+# Git status indicators — use ${VAR+isset} to distinguish empty (clean) from unset (run git)
+dirty=""
+if [ -n "${GIT_DIRTY+isset}" ]; then
+  [ -n "$GIT_DIRTY" ] && dirty="*"
+else
+  git diff --quiet HEAD 2>/dev/null || dirty="*"
+fi
+
+untracked=""
+if [ -n "${GIT_UNTRACKED+isset}" ]; then
+  [ -n "$GIT_UNTRACKED" ] && untracked="!"
+else
+  [ -n "$(git ls-files --others --exclude-standard 2>/dev/null | head -1)" ] && untracked="!"
+fi
+
+indicators="${dirty}${untracked}"
+
+# Assemble branch info: branch [*!]
+branch_info="${branch}"
+[ -n "$indicators" ] && branch_info="${branch_info} ${indicators}"
+
+printf '%b\n' "${path_display} (${branch_info}) | ${model_name} | ${ctx_display} | ${cost_fmt}"
